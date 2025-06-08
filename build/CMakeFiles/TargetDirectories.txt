@@ -1,0 +1,3 @@
+D:/Projects/NM_AI/Perai/build/CMakeFiles/chess_ai_demo.dir
+D:/Projects/NM_AI/Perai/build/CMakeFiles/edit_cache.dir
+D:/Projects/NM_AI/Perai/build/CMakeFiles/rebuild_cache.dir
