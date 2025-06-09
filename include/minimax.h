@@ -3,6 +3,7 @@
 
 #include <chess.hpp>
 #include <limits>
+#include <utility>
 
 class Minimax {
 public:
@@ -13,7 +14,7 @@ public:
     Minimax();
     
     // Thuật toán minimax chính
-    chess::Move findBestMove(const chess::Board& board, int depth);
+    std::pair<chess::Move, int> findBestMove(const chess::Board& board, int depth);
     
     // Lấy số node đã đánh giá
     long long getNodesEvaluated() const { return nodesEvaluated; }

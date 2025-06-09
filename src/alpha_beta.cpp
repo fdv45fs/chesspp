@@ -5,48 +5,52 @@
 
 AlphaBeta::AlphaBeta() : nodesEvaluated(0), pruningCount(0) {}
 
-chess::Move AlphaBeta::findBestMove(const chess::Board& board, int depth) {
+std::pair<chess::Move, int> AlphaBeta::findBestMove(const chess::Board& board, int depth) {
     resetStats();
     
     chess::Movelist moves;
     chess::movegen::legalmoves(moves, board);
     
     if (moves.empty()) {
-        return chess::Move::NO_MOVE;
+        return {chess::Move::NO_MOVE, evaluatePosition(board)};
     }
     
     chess::Move bestMove = moves[0];
-    int bestValue = NEGATIVE_INFINITY;
+    int bestValue;
     int alpha = NEGATIVE_INFINITY;
     int beta = INFINITY_VALUE;
     
-    std::cout << "Alpha-Beta Pruning đang tìm kiếm với độ sâu " << depth << "..." << std::endl;
-    
-    for (const auto& move : moves) {
-        chess::Board tempBoard = board;
-        tempBoard.makeMove(move);
-        
-        // Gọi alpha-beta với isMaximizing = false vì chúng ta vừa thực hiện nước đi của mình
-        int value = alphaBeta(tempBoard, depth - 1, alpha, beta, false);
-        
-        std::cout << "Nước đi: " << chess::uci::moveToUci(move) 
-                  << " - Giá trị: " << value << std::endl;
-        
-        if (value > bestValue) {
-            bestValue = value;
-            bestMove = move;
+    if (board.sideToMove() == chess::Color::WHITE) {
+        // It's White's turn (Maximizer)
+        bestValue = NEGATIVE_INFINITY;
+        for (const auto& move : moves) {
+            chess::Board tempBoard = board;
+            tempBoard.makeMove(move);
+            int value = alphaBeta(tempBoard, depth - 1, alpha, beta, false);
+            
+            if (value > bestValue) {
+                bestValue = value;
+                bestMove = move;
+            }
+            alpha = std::max(alpha, value);
         }
-        
-        // Cập nhật alpha cho root level
-        alpha = std::max(alpha, value);
+    } else {
+        // It's Black's turn (Minimizer)
+        bestValue = INFINITY_VALUE;
+         for (const auto& move : moves) {
+            chess::Board tempBoard = board;
+            tempBoard.makeMove(move);
+            int value = alphaBeta(tempBoard, depth - 1, alpha, beta, true);
+            
+            if (value < bestValue) {
+                bestValue = value;
+                bestMove = move;
+            }
+            beta = std::min(beta, value);
+        }
     }
     
-    std::cout << "Nước đi tốt nhất: " << chess::uci::moveToUci(bestMove) 
-              << " với giá trị: " << bestValue << std::endl;
-    std::cout << "Số node đã đánh giá: " << nodesEvaluated << std::endl;
-    std::cout << "Số lần cắt tỉa: " << pruningCount << std::endl;
-    
-    return bestMove;
+    return {bestMove, bestValue};
 }
 
 int AlphaBeta::alphaBeta(chess::Board& board, int depth, int alpha, int beta, bool isMaximizing) {
@@ -102,7 +106,7 @@ int AlphaBeta::alphaBeta(chess::Board& board, int depth, int alpha, int beta, bo
     }
 }
 
-// Hàm đánh giá vị trí, giờ sử dụng Evaluation::evaluateBoardSimple
+// Hàm đánh giá vị trí, giờ sử dụng Evaluation::evaluateBoard
 int AlphaBeta::evaluatePosition(const chess::Board& board) {
     auto gameStatus = board.isGameOver();
 
@@ -120,5 +124,5 @@ int AlphaBeta::evaluatePosition(const chess::Board& board) {
     }
     
     // Gọi hàm đánh giá material đơn giản
-    return Evaluation::evaluateBoardSimple(board);
+    return Evaluation::evaluateBoard(board);
 } 

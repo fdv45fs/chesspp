@@ -5,42 +5,46 @@
 
 Minimax::Minimax() : nodesEvaluated(0) {}
 
-chess::Move Minimax::findBestMove(const chess::Board& board, int depth) {
+std::pair<chess::Move, int> Minimax::findBestMove(const chess::Board& board, int depth) {
     resetStats();
     
     chess::Movelist moves;
     chess::movegen::legalmoves(moves, board);
     
     if (moves.empty()) {
-        return chess::Move::NO_MOVE;
+        return {chess::Move::NO_MOVE, evaluatePosition(board)};
     }
     
     chess::Move bestMove = moves[0];
-    int bestValue = NEGATIVE_INFINITY;
+    int bestValue;
     
-    std::cout << "Minimax đang tìm kiếm với độ sâu " << depth << "..." << std::endl;
-    
-    for (const auto& move : moves) {
-        chess::Board tempBoard = board;
-        tempBoard.makeMove(move);
-        
-        // Gọi minimax với isMaximizing = false vì chúng ta vừa thực hiện nước đi của mình
-        int value = minimax(tempBoard, depth - 1, false);
-        
-        std::cout << "Nước đi: " << chess::uci::moveToUci(move) 
-                  << " - Giá trị: " << value << std::endl;
-        
-        if (value > bestValue) {
-            bestValue = value;
-            bestMove = move;
+    if (board.sideToMove() == chess::Color::WHITE) {
+        // It's White's turn (Maximizer)
+        bestValue = NEGATIVE_INFINITY;
+        for (const auto& move : moves) {
+            chess::Board tempBoard = board;
+            tempBoard.makeMove(move);
+            int value = minimax(tempBoard, depth - 1, false);
+            if (value > bestValue) {
+                bestValue = value;
+                bestMove = move;
+            }
+        }
+    } else {
+        // It's Black's turn (Minimizer)
+        bestValue = INFINITY_VALUE;
+        for (const auto& move : moves) {
+            chess::Board tempBoard = board;
+            tempBoard.makeMove(move);
+            int value = minimax(tempBoard, depth - 1, true);
+            if (value < bestValue) {
+                bestValue = value;
+                bestMove = move;
+            }
         }
     }
     
-    std::cout << "Nước đi tốt nhất: " << chess::uci::moveToUci(bestMove) 
-              << " với giá trị: " << bestValue << std::endl;
-    std::cout << "Số node đã đánh giá: " << nodesEvaluated << std::endl;
-    
-    return bestMove;
+    return {bestMove, bestValue};
 }
 
 int Minimax::minimax(chess::Board& board, int depth, bool isMaximizing) {
@@ -82,7 +86,7 @@ int Minimax::minimax(chess::Board& board, int depth, bool isMaximizing) {
     }
 }
 
-// Hàm đánh giá vị trí, giờ sử dụng Evaluation::evaluateBoardSimple
+// Hàm đánh giá vị trí, giờ sử dụng Evaluation::evaluateBoard
 int Minimax::evaluatePosition(const chess::Board& board) {
     auto gameStatus = board.isGameOver();
 
@@ -100,5 +104,5 @@ int Minimax::evaluatePosition(const chess::Board& board) {
     }
     
     // Gọi hàm đánh giá material đơn giản
-    return Evaluation::evaluateBoardSimple(board);
+    return Evaluation::evaluateBoard(board);
 } 

@@ -2,30 +2,42 @@
 #define EVALUATION_H
 
 #include <chess.hpp> // Cần cho chess::Board, chess::Piece, chess::Color, chess::PieceType
+#include <array>
 
 class Evaluation {
 public:
-    // Giá trị cơ bản cho các quân cờ (có thể điều chỉnh)
-    static constexpr int PAWN_VALUE = 100;
-    static constexpr int KNIGHT_VALUE = 300;
-    static constexpr int BISHOP_VALUE = 310; // Thường Tượng được đánh giá cao hơn Mã một chút
-    static constexpr int ROOK_VALUE = 500;
-    static constexpr int QUEEN_VALUE = 900;
-    // Vua không có giá trị material trong cách tính này vì không thể bị bắt.
-
-    /**
-     * @brief Đánh giá bàn cờ một cách đơn giản bằng cách tính tổng giá trị quân cờ.
-     * 
-     * @param board Đối tượng bàn cờ hiện tại.
-     * @return int Điểm số từ góc nhìn của quân Trắng (điểm Trắng - điểm Đen).
-     *             Giá trị dương nghĩa là Trắng có lợi thế material.
-     *             Giá trị âm nghĩa là Đen có lợi thế material.
-     */
-    static int evaluateBoardSimple(const chess::Board& board);
+    static int evaluateBoard(const chess::Board& board);
 
 private:
-    // Hàm trợ giúp để lấy giá trị vật chất của một loại quân cờ
-    static int getPieceMaterialValue(chess::PieceType pieceType);
+    static void init_tables();
+
+    // PeSTO's values
+    static const int mg_value[6];
+    static const int eg_value[6];
+
+    static const int mg_pawn_table[64];
+    static const int eg_pawn_table[64];
+    static const int mg_knight_table[64];
+    static const int eg_knight_table[64];
+    static const int mg_bishop_table[64];
+    static const int eg_bishop_table[64];
+    static const int mg_rook_table[64];
+    static const int eg_rook_table[64];
+    static const int mg_queen_table[64];
+    static const int eg_queen_table[64];
+    static const int mg_king_table[64];
+    static const int eg_king_table[64];
+    
+    static const int* mg_pesto_table[6];
+    static const int* eg_pesto_table[6];
+
+    static const int gamephaseInc[12];
+
+    // Pre-computed tables
+    static int mg_table[12][64];
+    static int eg_table[12][64];
+
+    static bool tables_initialized;
 };
 
 #endif // EVALUATION_H 

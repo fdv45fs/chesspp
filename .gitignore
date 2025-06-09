@@ -1,0 +1,52 @@
+# CMake-generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+
+# Build directory
+build/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+
+# MSVC-generated files
+*.obj
+*.exe
+*.pdb
+*.dll
+*.lib
+*.ilk
+*.aps
+*.tlb
+*.tli
+*.tlh
+*.tmp
+*.rsp
+*.pch
+*.vs
+*.suo
+
+# VS Code
+.vscode/
+
+# Binaries
+*.exe
+*.out
+*.app
+
+# Libraries
+*.a
+*.so
+*.dylib
+
+# CSV files
+fen_input.csv
+fen_output.csv
+
+# Other
+*.stackdump
+*.swp
+*.bak
+*~

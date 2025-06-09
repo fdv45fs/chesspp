@@ -3,49 +3,50 @@
 #include "../include/alpha_beta.h"
 #include <iostream>
 
-ChessEngine::ChessEngine() : searchDepth(4), nodesEvaluated(0), searchTimeMs(0.0) {}
+ChessEngine::ChessEngine() : searchTimeMs(0.0) {}
 
 ChessEngine::~ChessEngine() {}
 
-chess::Move ChessEngine::findBestMoveMinimax(const chess::Board& board, int depth) {
-    std::cout << "\n=== SỬ DỤNG THUẬT TOÁN MINIMAX ===" << std::endl;
+SearchResult ChessEngine::findBestMoveMinimax(const chess::Board& board, int depth) {
+    std::cout << "\n> Đang tính toán với Minimax..." << std::endl;
     
     startTimer();
-    
     Minimax minimax;
-    chess::Move bestMove = minimax.findBestMove(board, depth);
-    
+    auto [bestMove, bestEval] = minimax.findBestMove(board, depth);
     stopTimer();
     
-    nodesEvaluated = minimax.getNodesEvaluated();
-    
-    std::cout << "Thời gian tìm kiếm: " << searchTimeMs << " ms" << std::endl;
-    std::cout << "================================\n" << std::endl;
-    
-    return bestMove;
+    SearchResult result;
+    result.move = bestMove;
+    result.eval = bestEval;
+    result.nodes = minimax.getNodesEvaluated();
+    result.time_ms = searchTimeMs;
+    // result.prunings is 0 by default
+
+    return result;
 }
 
-chess::Move ChessEngine::findBestMoveAlphaBeta(const chess::Board& board, int depth) {
-    std::cout << "\n=== SỬ DỤNG THUẬT TOÁN ALPHA-BETA PRUNING ===" << std::endl;
+SearchResult ChessEngine::findBestMoveAlphaBeta(const chess::Board& board, int depth) {
+    std::cout << "\n> Đang tính toán với Alpha-Beta Pruning..." << std::endl;
     
     startTimer();
     
     AlphaBeta alphaBeta;
-    chess::Move bestMove = alphaBeta.findBestMove(board, depth);
+    auto [bestMove, bestEval] = alphaBeta.findBestMove(board, depth);
     
     stopTimer();
     
-    nodesEvaluated = alphaBeta.getNodesEvaluated();
+    SearchResult result;
+    result.move = bestMove;
+    result.eval = bestEval;
+    result.nodes = alphaBeta.getNodesEvaluated();
+    result.time_ms = searchTimeMs;
+    result.prunings = alphaBeta.getPruningCount();
     
-    std::cout << "Thời gian tìm kiếm: " << searchTimeMs << " ms" << std::endl;
-    std::cout << "Hiệu quả cắt tỉa: " << alphaBeta.getPruningCount() << " lần" << std::endl;
-    std::cout << "============================================\n" << std::endl;
-    
-    return bestMove;
+    return result;
 }
 
 void ChessEngine::resetStats() {
-    nodesEvaluated = 0;
+    // This is now handled within the algorithm classes
     searchTimeMs = 0.0;
 }
 
