@@ -1,5 +1,6 @@
 #include "../include/chess_engine.h"
 #include "../include/evaluation.h"
+#include "../include/web_server.h"
 #include <iostream>
 #include <string>
 #include <limits>
@@ -145,6 +146,7 @@ int main() {
         std::cout << "3. So sánh cả hai thuật toán" << std::endl;
         std::cout << "4. Xử lý file FEN CSV" << std::endl;
         std::cout << "5. Chơi với máy (Alpha-Beta)" << std::endl;
+        std::cout << "6. Chơi với UI (Giao diện web)" << std::endl;
         std::cout << "Lựa chọn của bạn: ";
         std::cin >> choice;
 
@@ -162,6 +164,13 @@ int main() {
                  return 1;
             }
             processFenCsv(depth);
+        } else if (choice == 6) {
+            try {
+                start_web_server();
+            } catch (const std::exception& e) {
+                std::cerr << "Lỗi khi khởi động máy chủ: " << e.what() << std::endl;
+                return 1;
+            }
         } else if ((choice >= 1 && choice <= 3) || choice == 5) {
             chess::Board board;
             int board_choice;

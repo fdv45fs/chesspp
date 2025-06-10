@@ -11,6 +11,7 @@ set(SOURCES
     src/evaluation.cpp
     src/alpha_beta.cpp
     src/minimax.cpp
+    src/web_server.cpp
 )
 
 # Set the include directories
@@ -50,3 +51,7 @@ endif()
 #    cmake --build . 
 #    (or use 'make' if cmake generates Makefiles)
 # 5. Run the executable: ./chess_ai_demo (or build\Debug\chess_ai_demo.exe on Windows) 
+
+if(WIN32)
+    target_link_libraries(chess_ai_demo PRIVATE ws2_32 wsock32)
+endif() 
