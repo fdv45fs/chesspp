@@ -18,7 +18,7 @@ void printBoard(const chess::Board& board) {
     std::cout << std::string(60, '=') << std::endl;
 }
 
-void compareAlgorithms(const chess::Board& board, int depth) {
+void compareAlgorithms(chess::Board board, int depth) {
     ChessEngine engine;
     
     auto minimaxResult = engine.findBestMoveMinimax(board, depth);
@@ -50,6 +50,33 @@ void compareAlgorithms(const chess::Board& board, int depth) {
         std::cout << "  - Giảm " << nodeReduction << "% số nodes đánh giá" << std::endl;
         std::cout << "  - Giảm " << timeReduction << "% thời gian tìm kiếm" << std::endl;
     }
+    
+    std::cout << std::string(60, '=') << std::endl;
+}
+
+void compareAlphaBetaVsTT(const chess::Board& board, int depth) {
+    ChessEngine engine;
+    
+    auto alphaBetaResult = engine.findBestMoveAlphaBeta(board, depth);
+    auto abTTResult = engine.findBestMoveAlphaBetaTT(board, depth);
+
+    std::cout << "\n\n" << std::string(60, '=') << std::endl;
+    std::cout << "      SO SÁNH Alpha-Beta vs Alpha-Beta+TT (Độ sâu: " << depth << ")" << std::endl;
+    std::cout << std::string(60, '=') << std::endl;
+    
+    std::cout << "Alpha-Beta Pruning:" << std::endl;
+    std::cout << "  - Nước đi: " << chess::uci::moveToUci(alphaBetaResult.move) << std::endl;
+    std::cout << "  - Đánh giá: " << alphaBetaResult.eval << std::endl;
+    std::cout << "  - Nodes đã duyệt: " << alphaBetaResult.nodes << std::endl;
+    std::cout << "  - Số lần cắt tỉa: " << alphaBetaResult.prunings << std::endl;
+    std::cout << "  - Thời gian: " << alphaBetaResult.time_ms << " ms" << std::endl;
+
+    std::cout << "\nAlpha-Beta + TTable:" << std::endl;
+    std::cout << "  - Nước đi: " << chess::uci::moveToUci(abTTResult.move) << std::endl;
+    std::cout << "  - Đánh giá: " << abTTResult.eval << std::endl;
+    std::cout << "  - Nodes đã duyệt: " << abTTResult.nodes << std::endl;
+    std::cout << "  - TT Hits: " << abTTResult.tt_hits << std::endl;
+    std::cout << "  - Thời gian: " << abTTResult.time_ms << " ms" << std::endl;
     
     std::cout << std::string(60, '=') << std::endl;
 }
@@ -143,10 +170,11 @@ int main() {
         std::cout << "\nChọn chế độ:" << std::endl;
         std::cout << "1. Chỉ chạy Minimax" << std::endl;
         std::cout << "2. Chỉ chạy Alpha-Beta Pruning" << std::endl;
-        std::cout << "3. So sánh cả hai thuật toán" << std::endl;
+        std::cout << "3. So sánh Minimax và Alpha-Beta" << std::endl;
         std::cout << "4. Xử lý file FEN CSV" << std::endl;
         std::cout << "5. Chơi với máy (Alpha-Beta)" << std::endl;
         std::cout << "6. Chơi với UI (Giao diện web)" << std::endl;
+        std::cout << "7. So sánh Alpha-Beta và Alpha-Beta + TTable" << std::endl;
         std::cout << "Lựa chọn của bạn: ";
         std::cin >> choice;
 
@@ -171,7 +199,7 @@ int main() {
                 std::cerr << "Lỗi khi khởi động máy chủ: " << e.what() << std::endl;
                 return 1;
             }
-        } else if ((choice >= 1 && choice <= 3) || choice == 5) {
+        } else if ((choice >= 1 && choice <= 3) || choice == 5 || choice == 7) {
             chess::Board board;
             int board_choice;
             std::cout << "\nChọn thế cờ:" << std::endl;
@@ -228,6 +256,10 @@ int main() {
                 }
                 case 3: {
                     compareAlgorithms(board, depth);
+                    break;
+                }
+                case 7: {
+                    compareAlphaBetaVsTT(board, depth);
                     break;
                 }
                 case 5: {

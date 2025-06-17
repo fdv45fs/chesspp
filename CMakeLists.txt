@@ -12,6 +12,8 @@ set(SOURCES
     src/alpha_beta.cpp
     src/minimax.cpp
     src/web_server.cpp
+    src/transposition_table.cpp
+    src/ab_tt.cpp
 )
 
 # Set the include directories

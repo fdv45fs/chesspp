@@ -1,61 +1,41 @@
 #include "../include/chess_engine.h"
+#include "../include/evaluation.h"
 #include "../include/minimax.h"
 #include "../include/alpha_beta.h"
+#include "../include/ab_tt.h"
 #include <iostream>
 
-ChessEngine::ChessEngine() : searchTimeMs(0.0) {}
+ChessEngine::ChessEngine() {
+    // Khởi tạo Bảng hoán vị với kích thước 64MB
+    tt = std::make_unique<TranspositionTable>(64);
+}
 
-ChessEngine::~ChessEngine() {}
-
-SearchResult ChessEngine::findBestMoveMinimax(const chess::Board& board, int depth) {
-    std::cout << "\n> Đang tính toán với Minimax..." << std::endl;
-    
-    startTimer();
+SearchResult ChessEngine::findBestMoveMinimax(const chess::Board& board, int depth)
+{
+    current_age++; // Tăng tuổi cho lượt tìm kiếm mới
     Minimax minimax;
-    auto [bestMove, bestEval] = minimax.findBestMove(board, depth);
-    stopTimer();
+    auto start_time = std::chrono::high_resolution_clock::now();
+    auto [bestMove, eval] = minimax.findBestMove(board, depth);
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
     
-    SearchResult result;
-    result.move = bestMove;
-    result.eval = bestEval;
-    result.nodes = minimax.getNodesEvaluated();
-    result.time_ms = searchTimeMs;
-    // result.prunings is 0 by default
-
-    return result;
+    return {bestMove, eval, (double)duration.count(), minimax.getNodesEvaluated(), 0, 0};
 }
 
-SearchResult ChessEngine::findBestMoveAlphaBeta(const chess::Board& board, int depth) {
-    std::cout << "\n> Đang tính toán với Alpha-Beta Pruning..." << std::endl;
-    
-    startTimer();
-    
+SearchResult ChessEngine::findBestMoveAlphaBeta(const chess::Board& board, int depth)
+{
+    current_age++; // Tăng tuổi cho lượt tìm kiếm mới
     AlphaBeta alphaBeta;
-    auto [bestMove, bestEval] = alphaBeta.findBestMove(board, depth);
+    auto start_time = std::chrono::high_resolution_clock::now();
+    auto [bestMove, eval] = alphaBeta.findBestMove(board, depth);
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
     
-    stopTimer();
-    
-    SearchResult result;
-    result.move = bestMove;
-    result.eval = bestEval;
-    result.nodes = alphaBeta.getNodesEvaluated();
-    result.time_ms = searchTimeMs;
-    result.prunings = alphaBeta.getPruningCount();
-    
-    return result;
+    return {bestMove, eval, (double)duration.count(), alphaBeta.getNodesEvaluated(), alphaBeta.getPruningCount(), 0};
 }
 
-void ChessEngine::resetStats() {
-    // This is now handled within the algorithm classes
-    searchTimeMs = 0.0;
+SearchResult ChessEngine::findBestMoveAlphaBetaTT(const chess::Board& board, int depth) {
+    current_age++; // Tăng tuổi cho lượt tìm kiếm mới
+    chess::Board boardCopy = board;
+    return ::findBestMoveAlphaBetaTT(boardCopy, *tt, depth, current_age);
 }
-
-void ChessEngine::startTimer() {
-    searchStartTime = std::chrono::high_resolution_clock::now();
-}
-
-void ChessEngine::stopTimer() {
-    auto endTime = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - searchStartTime);
-    searchTimeMs = duration.count() / 1000.0; // Chuyển đổi sang milliseconds
-} 
